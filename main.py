@@ -3,8 +3,13 @@ import sys
 import random
 
 # Game Constants
-WIDTH, HEIGHT = 640, 640
+BOARD_WIDTH = 640
+BOARD_HEIGHT = 640
+UI_HEIGHT = 80
+WIDTH = BOARD_WIDTH
+HEIGHT = BOARD_HEIGHT + UI_HEIGHT
 ROWS, COLS = 8, 8
+SQUARE_SIZE = BOARD_WIDTH // COLS
 SQUARE_SIZE = WIDTH // COLS
 FPS = 60
 
@@ -108,24 +113,29 @@ def draw_ui(win, current_player, game_over, winner_msg, font, big_font):
         win.blit(text, text_rect)
         win.blit(restart_text, restart_rect)
     else:
+        # Draw bottom UI panel
+        ui_rect = pygame.Rect(0, BOARD_HEIGHT, WIDTH, UI_HEIGHT)
+        pygame.draw.rect(win, BLACK, ui_rect)
+        pygame.draw.rect(win, GRAY, ui_rect, 2)
+        
         # Turn indicator
         turn_text = font.render(f"Turn: {current_player.name}", True, current_player.color)
-        bg_rect = pygame.Rect(5, 5, turn_text.get_width() + 20, turn_text.get_height() + 10)
+        bg_rect = pygame.Rect(WIDTH//2 - turn_text.get_width()//2 - 10, BOARD_HEIGHT + UI_HEIGHT//2 - turn_text.get_height()//2 - 5, turn_text.get_width() + 20, turn_text.get_height() + 10)
         pygame.draw.rect(win, BLACK, bg_rect)
         pygame.draw.rect(win, WHITE, bg_rect, 2)
-        win.blit(turn_text, (15, 10))
+        win.blit(turn_text, (WIDTH//2 - turn_text.get_width()//2, BOARD_HEIGHT + UI_HEIGHT//2 - turn_text.get_height()//2))
 
 def intro_screen(win, font, big_font):
     win.fill(WHITE)
     title = big_font.render("Knight Chase", True, BLACK)
-    title_rect = title.get_rect(center=(WIDTH//2, HEIGHT//3))
+    title_rect = title.get_rect(center=(WIDTH//2, BOARD_HEIGHT//3))
     win.blit(title, title_rect)
     
-    prompt1 = font.render("Press 1 for Player vs Player", True, DARK_GRAY)
-    prompt2 = font.render("Press 2 for Player vs Computer", True, DARK_GRAY)
+    prompt1 = font.render("Press 1 for Knight vs Knight", True, DARK_GRAY)
+    prompt2 = font.render("Press 2 for Knight vs Computer", True, DARK_GRAY)
     
-    win.blit(prompt1, prompt1.get_rect(center=(WIDTH//2, HEIGHT//2)))
-    win.blit(prompt2, prompt2.get_rect(center=(WIDTH//2, HEIGHT//2 + 50)))
+    win.blit(prompt1, prompt1.get_rect(center=(WIDTH//2, BOARD_HEIGHT//2)))
+    win.blit(prompt2, prompt2.get_rect(center=(WIDTH//2, BOARD_HEIGHT//2 + 50)))
     
     pygame.display.update()
     
@@ -152,8 +162,8 @@ def main():
     vs_computer = intro_screen(win, font, big_font)
     
     board = Board()
-    p1 = Knight(0, 0, BLUE, "Player A", "K-A")
-    p2 = Knight(ROWS-1, COLS-1, RED, "Player B", "K-B", is_computer=vs_computer)
+    p1 = Knight(0, 0, BLUE, "Knight A", "K-A")
+    p2 = Knight(ROWS-1, COLS-1, RED, "Knight B", "K-B", is_computer=vs_computer)
     
     current_player = p1
     other_player = p2
@@ -210,22 +220,23 @@ def main():
                 
             if event.type == pygame.MOUSEBUTTONDOWN and not game_over and not current_player.is_computer:
                 x, y = event.pos
-                col, row = x // SQUARE_SIZE, y // SQUARE_SIZE
-                
-                if (row, col) in valid_moves:
-                    # Capture condition
-                    if (row, col) == (other_player.row, other_player.col):
-                        board.burn_square(current_player.row, current_player.col)
-                        current_player.row, current_player.col = row, col
-                        game_over = True
-                        winner_msg = f"{current_player.name} WINS! (Capture)"
-                    else:
-                        # Standard move
-                        board.burn_square(current_player.row, current_player.col)
-                        current_player.row, current_player.col = row, col
-                        
-                        # Swap turns
-                        current_player, other_player = other_player, current_player
+                if y < BOARD_HEIGHT: # Only process clicks on the board
+                    col, row = x // SQUARE_SIZE, y // SQUARE_SIZE
+                    
+                    if (row, col) in valid_moves:
+                        # Capture condition
+                        if (row, col) == (other_player.row, other_player.col):
+                            board.burn_square(current_player.row, current_player.col)
+                            current_player.row, current_player.col = row, col
+                            game_over = True
+                            winner_msg = f"{current_player.name} WINS! (Capture)"
+                        else:
+                            # Standard move
+                            board.burn_square(current_player.row, current_player.col)
+                            current_player.row, current_player.col = row, col
+                            
+                            # Swap turns
+                            current_player, other_player = other_player, current_player
 
         # Render
         draw_board(win, board, p1, p2, valid_moves, font)
