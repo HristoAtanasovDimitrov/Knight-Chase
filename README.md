@@ -4,7 +4,7 @@ A 2D digital version of the logic-based board game "Knight Chase" built with Pyt
 
 ## Rules
 - **Board:** 8x8 grid.
-- **Players:** Two players (Player A and Player B) starting in opposite corners.
+- **Players:** Two players (Knight A and Knight B) starting in opposite corners.
 - **Modes:** Play either Player vs Player (PvP) or Player vs Computer (PvE).
 - **Movement:** Like a Knight in Chess (an "L" shape). Click on the highlighted spots to move. In PvE mode, the computer will move automatically after your turn.
 - **Trail Mechanic:** Left squares are "burnt" (turn dark grey with orange accents) and cannot be landed on again.

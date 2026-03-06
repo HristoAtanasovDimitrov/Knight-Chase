@@ -64,15 +64,20 @@ def draw_board(win, board, p1, p2, valid_moves, font):
         for col in range(COLS):
             rect = pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
             
-            # Checkerboard pattern
-            if (row + col) % 2 == 0:
-                pygame.draw.rect(win, GRAY, rect)
-            else:
-                pygame.draw.rect(win, DARK_GRAY, rect)
+            # All light squares
+            pygame.draw.rect(win, GRAY, rect)
             
-            # Draw Burnt squares over the pattern
+            # Draw Burnt squares over the pattern (Red X instead of full square)
             if board.grid[row][col] == 1:
-                pygame.draw.rect(win, BURN_COLOR, rect)
+                # Draw an X
+                offset = 10 # Padding from the edges of the square
+                start_pos1 = (col * SQUARE_SIZE + offset, row * SQUARE_SIZE + offset)
+                end_pos1 = (col * SQUARE_SIZE + SQUARE_SIZE - offset, row * SQUARE_SIZE + SQUARE_SIZE - offset)
+                start_pos2 = (col * SQUARE_SIZE + SQUARE_SIZE - offset, row * SQUARE_SIZE + offset)
+                end_pos2 = (col * SQUARE_SIZE + offset, row * SQUARE_SIZE + SQUARE_SIZE - offset)
+                
+                pygame.draw.line(win, RED, start_pos1, end_pos1, 5) # Thickness of 5
+                pygame.draw.line(win, RED, start_pos2, end_pos2, 5)
             
             # Highlight valid moves
             if (row, col) in valid_moves:
@@ -165,8 +170,11 @@ def main():
     p1 = Knight(0, 0, BLUE, "Knight A", "K-A")
     p2 = Knight(ROWS-1, COLS-1, RED, "Knight B", "K-B", is_computer=vs_computer)
     
-    current_player = p1
-    other_player = p2
+    # Randomly pick starting player
+    if random.choice([True, False]):
+        current_player, other_player = p1, p2
+    else:
+        current_player, other_player = p2, p1
     
     running = True
     game_over = False
